@@ -1,0 +1,26 @@
+{
+        "name": "hassankwl1001/mediapanel",
+        "description": "Meida Panel package",
+        "authors": [{
+            "name": "Hassan Nasir",
+            "email": "hassankwl@gmail.com"
+        }],
+	"minimum-stability": "dev",
+        "require": {
+	    "intervention/image": "2.*",
+	    "rosell-dk/webp-convert": "^2.3"
+	},
+        "autoload": {
+            "psr-4": {
+                "hassankwl1001\\mediapanel\\": "src/"
+            }
+        },
+	"extra": {
+   	  "laravel": {
+      	  	"providers": [
+                 "hassankwl1001\\mediapanel\\MediaPanelServiceProvider"
+      	       ],
+              "aliases": {}
+           }
+        }
+    }
