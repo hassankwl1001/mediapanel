@@ -1,5 +1,5 @@
 <?php
-namespace dgaps\mediapanel\Http\Controllers;
+namespace hassankwl1001\mediapanel\Http\Controllers;
 use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;

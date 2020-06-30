@@ -1,6 +1,6 @@
 <?php
 //dgaps\mediapanel\src\Http\Controllers\MediaPanelController.php
-namespace dgaps\mediapanel\Http\Controllers;
+namespace hassankwl1001\mediapanel\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use DB;
