@@ -21,7 +21,7 @@
 						}
 					@endphp
 				<div>
-					<input type="number" name="size" placeholder="px" value="{{$size}}" >
+					<input type="number" name="size" placeholder="Enter Width in Pixel" value="{{$size}}" >
 				</div>
 				@endfor
 			</div>
@@ -33,7 +33,7 @@
 		
 		@php
 		$webp = (isset($settings["auto_webp"])) ? $settings["auto_webp"] : 0;
-		$title = (isset($settings["default_image_title"])) ? $settings["default_image_title"] : 1;
+		$title = (isset($settings["default_title"])) ? $settings["default_title"] : 1;
 		$alt = (isset($settings["default_alt_text"])) ? $settings["default_alt_text"] : 1;
 		$desp = (isset($settings["default_desp"])) ? $settings["default_desp"] : 1;
 		$cap = (isset($settings["default_caption"])) ? $settings["default_caption"] : 1;
@@ -81,11 +81,13 @@
 					<label>Default Image Size</label>
 					<div>
 					<input type="radio" name="image_size" value="0" @if($sz==0) checked @endif > Actual
+					<span class="dfSizes">
 					@for($n=0; $n <= $len; $n++)
 						@if(isset($sizes[$n]))
 							<input type="radio" name="image_size" value="{{$sizes[$n]}}"  @if($sz==$sizes[$n]) checked @endif > {{$sizes[$n]}} &nbsp; &nbsp; 
 						@endif
 					@endfor
+					</span>
 					</div>
 				</div>
 				<div>

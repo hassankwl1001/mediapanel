@@ -7,6 +7,10 @@ use DB;
 //use dgaps\mediapanel\Models\Media;
 
 class MediaPanelController extends Controller{
+	private $_limit;
+	function __construct(){
+		$this->_limit = 16;
+	}
 	public function index(){
 		request("action");
 		if(request()->has("action")){
@@ -32,7 +36,68 @@ class MediaPanelController extends Controller{
 		}else{
 			return view("mediapanel::images", $data);
 		}
-		
+	}
+	
+	public function parseImages($v){
+		$up_path = base_path().'/images/';
+		$images_data = array();
+		$images = json_decode($v->images, true);
+		$image = $images["full"];
+		$allowed = explode("|","jpg|jpeg|gif|png|webp");
+		$exp=explode(".", $image);
+		$file_type="image";
+		$info = explode(".",$image);
+		$file_ext = strtolower(end($info));
+		$allsizes = json_decode($v->sizes, true);
+		$sizes = array();
+		foreach($allsizes as $vsize){
+			$sizes[] = $vsize;
+		}
+		sort($sizes);
+		if (in_array($file_ext, $allowed)){
+			$f = explode(".",$image);
+			$file_name = str_replace(".".end($f),"", $image); 
+			$name = str_replace(".".end($f),"", $image);
+			$name = str_replace("-", " ",$name);
+			$name = str_replace("_", " ",$name);
+			$name = str_replace("thumb","",$name);
+			$name = ucwords($name);
+			if (file_exists($up_path.$image)){
+				$types = explode(",", $v->type);
+				$sizes = json_decode($v->sizes, true);
+				$image_info = array();
+				$image_info["id"] = $v->id;
+				$image_info["title"] = $v->title;
+				$image_info["alt"] = $v->alt;
+				$image_info["caption"] = $v->caption;
+				$image_info["description"] = $v->description;
+				$image_info["created_at"] = $v->created_at;
+				$image_info["updated_at"] = $v->updated_at;
+				$image_info["folders"] = explode(",", $v->folder);
+				$image_info["types"] = $types;
+				$sizes[] = "Actual";
+				foreach($types as $kt=>$vt){
+					$fileType = $vt;
+					foreach($sizes as $size){
+						if($size=="Actual"){
+							$fileP = $file_name.".$fileType";
+						}else{
+							$fileP = $file_name."-$size".".$fileType";
+						}
+						$fileUrl = url("/images/".$fileP);
+						list($width, $height) = getimagesize($up_path.$fileP);
+						$image_info["sizes"][$size][$fileType] = array(
+							"url" => $fileUrl,
+							"size" => filesize($up_path.$fileP),
+							"width" => $width,
+							"height" => $height
+						);
+					}
+				}
+				$images_data = $image_info;	
+			}
+		}
+		return $images_data;
 	}
 	
 	public function createFolder(){
@@ -67,16 +132,29 @@ class MediaPanelController extends Controller{
 	function get_images($offset = 0, $folder = ""){
 		$d = array();
 		if ($folder==""){
-			$r = DB::table("media")->orderBy("id", "desc")->get();
+			$r = DB::table("media")->orderBy("id", "desc")->offset($offset)->limit($this->_limit)->get();
 		}else{
 			$r = DB::table("media")->where([
 				["folder", "like", "%$folder%"]
-			])->orderBy("id", "desc")->get();
+			])->orderBy("id", "desc")->offset($offset)->limit($this->_limit)->get();
 		}
 		$d["images"] = $r;
 		$d["folder"] = DB::table("media_category")->get();	
 		$d["folder_c"] = $folder;
 		return $d;
+	}
+	
+	function more_images(){
+		$folder = request("f");
+		$offset = (request("page") - 1) * $this->_limit;
+		$images = $this->get_images($offset, $folder);
+		$images = $images["images"];
+		$up_path = base_path().'/images/';
+		if(count($images)==0){
+			return "No More Images";
+		}else{
+			return view("mediapanel::more_list", compact("images", "up_path"))->render();	
+		}
 	}
 	
 	function get_folder_list(){
@@ -105,6 +183,8 @@ class MediaPanelController extends Controller{
 				"images" => $images,
 				"title" => $up["name"],
 				"alt" => $up["name"],
+				"caption" => $up["name"],
+				"description" => $up["name"],
 				"sizes" => json_encode($up["sizes"]),
 				"folder" => $folder,
 				"type" => $up["ext"],
@@ -128,34 +208,51 @@ class MediaPanelController extends Controller{
 			$id = request("id");
 			$alt = request("alt");
 			$title = request("title");
+			$caption = request("caption");
+			$description = request("description");
+			$size = request("size");
+			$folder = request("folder");
 			$data = array(
 				"alt" => $alt,
 				"title" => $title,
+				"caption" => $caption,
+				"description" => $description,
+				"folder" => implode(",",$folder),
 				"updated_at" => date("Y-m-d h:i:s")
 			);
 			$r = DB::table("media")->where("id", $id)->first();
 			$sizes = json_decode($r->sizes,true);
 			if(request()->has("size")){
-				if(isset($r->id)){
-					$size = request("size");
+				if(isset($r->id) and is_numeric($size)){
+					$rweb = DB::table("media_setting")->where("media_key", "auto_webp")->first();
+					if(isset($rweb->id)){
+						$is_webp_allow = ($rweb->media_value==1) ? 1 : 0;
+					}else{
+						$is_webp_allow = 0;
+					}
 					$images = json_decode($r->images,true);
 					$image=  $images["full"];
 					$source = base_path().'/images/'.$image;
 					$media = new ImageManage();
 					$media->generate_thumb($source, base_path().'/images/', $size,"","");
+					if($is_webp_allow==1){
+						if(extension_loaded('gd')){
+							$info = gd_info();
+							if($info["WebP Support"]){
+								$media->generate_thumb_with_webp($source, base_path().'/images/',$size, "thumb");
+							}
+						}
+					}
+					
 					$sizes[] = $size;
-					$data["sizes"] = json_encode($sizes);
+					$data["sizes"] = $sizes;
 				}
 			}
-			
 			DB::table("media")->where("id", $id)->update($data);
 		}
-		$msizes = array();
-		foreach($sizes as $k=>$v){
-			$msizes[] = $v;
-		}
-		sort($msizes);
-		return json_encode(array("resp"=>"success", "msg"=>"Record has been updated.", "sizes"=>$msizes));
+		$r = DB::table("media")->where("id", $id)->first();
+		$n = $this->parseImages($r);
+		return json_encode(array("resp"=>"success", "msg"=>"Record has been updated.", "data"=>$n));
 	}
 	
 	function getSetting(){
@@ -176,6 +273,9 @@ class MediaPanelController extends Controller{
 	function settings (){
 		$settings = $this->getSetting();
 		return view("mediapanel::settings", compact("settings"));
+	}
+	function cropSec (){
+		return view("mediapanel::crop_sec");
 	}
 	
 	function storesizes(){
@@ -216,13 +316,14 @@ class MediaPanelController extends Controller{
 		if(request()->has("f")){
 			$v = request("f");
 			if (request()->has("g") and request("g")!=""){
-				$images = DB::table("media")->where("title", "like" ,"%$v%")->whereRaw('FIND_IN_SET(?,folder)', [request("g")])->get();
+				$images = DB::table("media")->where("title", "like" ,"%$v%")->whereRaw('FIND_IN_SET(?,folder)', [request("g")])->offset(0)->limit($this->_limit)->orderBy("id", "desc")->get();
 			}else{
-				$images = DB::table("media")->where("title", "like" ,"%$v%")->get();
+				$images = DB::table("media")->where("title", "like" ,"%$v%")->offset(0)->limit($this->_limit)->orderBy("id", "desc")->get();
 			}
 			
 			$up_path = base_path().'/images/';
-			$html = view("mediapanel::images_list", compact("images", "up_path"))->render();
+			$is_search = true;
+			$html = view("mediapanel::images_list", compact("images", "up_path", "is_search"))->render();
 			return $html;
 		}else{
 			return "";
@@ -232,9 +333,9 @@ class MediaPanelController extends Controller{
 	function _changeFolder(){
 		$up_path = base_path().'/images/';
 		if(request()->has("f") and request("f")!=""){
-			$images = DB::table("media")->whereRaw('FIND_IN_SET(?,folder)', [request("f")])->get();
+			$images = DB::table("media")->whereRaw('FIND_IN_SET(?,folder)', [request("f")])->offset(0)->limit($this->_limit)->orderBy("id", "desc")->get();
 		}else{
-			$images = DB::table("media")->get();
+			$images = DB::table("media")->offset(0)->limit($this->_limit)->orderBy("id", "desc")->get();
 		}
 		$html = view("mediapanel::images_list", compact("images", "up_path"))->render();
 		return $html;
@@ -268,21 +369,10 @@ class MediaPanelController extends Controller{
 			$id = request("t");
 			$r= DB::table("media")->where("id", $id)->first();
 			if(isset($r->id)){
-				$image = json_decode($r->images, true);
-				$image = $image["full"];
-				$sizes = json_decode($r->sizes, true);
-				$types = explode(",",$r->type);
-				$exp = explode(".",$image);
-				$ext= end($exp);
-				$image_without_ext = str_replace(".".$ext, "", $image);
-				foreach($types as $k=>$v){
-					$images[] = $image_without_ext.".".$v;
-					foreach($sizes as $size){
-						$images[] = $image_without_ext."-".$size.".".$v;
-					}
-				}
+				$images = json_decode($r->images, true);
 			}
 		}
+		
 		foreach($images as $k=>$v){
 			$image = base_path().'/images/'.$v;
 			if(file_exists($image) and $v!=""){

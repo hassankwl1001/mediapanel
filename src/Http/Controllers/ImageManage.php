@@ -138,12 +138,12 @@ class ImageManage{
 		$arr = array();
 		$fileOrgName = "";
 		$selSizes = array();
-		if (is_object($image)){
+		if (isset($image) and is_object($image) ){
 			$fileName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-			$fileName = $this->sanitize_title($fileName);
 			$fileOrgName = $fileName;
-			$r = rand(100,999).rand(100,999).rand(100,999).rand(100,999);
-			$this->name = ($this->name=="") ? $fileName."-".$r : $this->name;
+			//$fileName = $this->sanitize_title($fileName);
+			$this->name = $this->unique_filename($this->path,$fileName.".".$image->getClientOriginalExtension());
+			//$this->name = ($this->name=="") ? $fileName."-".$r : $this->name;
 			$ext = $image->getClientOriginalExtension();
 			$thumb = $this->name."-thumb.".$ext;
 			$mid = $this->name."-mid.".$ext;
@@ -158,10 +158,13 @@ class ImageManage{
 				if(extension_loaded('gd')){
 					$info = gd_info();	
 					if($info["WebP Support"]){
-						$this->convert_webp($img, $destination, $ext);	
+						//$this->convert_webp($img, $destination, $ext);	
 					}
 				}
 			}
+			
+			$siz = getimagesize($this->path.$fileName);
+			$img_wd = $siz[0];
 			$all_images = array();
 			$all_images["full"] = strtolower($fileName);
 			if($this->is_valid_image($img)==false){
@@ -170,47 +173,129 @@ class ImageManage{
 				try{
 					$cmp = $destinationPath."/$fileName";
 					$all_images["full"] = $fileName;
-					if (count($sizes) > 0){
-						foreach($sizes as $size){
-							if($is_webp_allow==1){
-								if(extension_loaded('gd')){
-									$info = gd_info();
-									if($info["WebP Support"]){
-										$this->generate_thumb_with_webp($img, $this->path,$size, "thumb");
-										$selSizes[]=  $size;
-									}
-								}
-							}else{
-								if(strtolower($ext)!="webp"){
-									$this->generate_thumb($img, $this->path,$size, "thumb");
+					if(extension_loaded('gd')){
+						if (count($sizes) > 0){
+							foreach($sizes as $size){
+								if($img_wd > $size){
+									$nme = $this->generate_thumb($img, $this->path,$size, "thumb");
 									$selSizes[]=  $size;
+									$all_images[$size] = $nme;
+									/*if($is_webp_allow==1){
+										if(extension_loaded('gd')){
+											$info = gd_info();
+											if($info["WebP Support"]){
+												$this->generate_thumb_with_webp($img, $this->path,$size, "thumb");
+												$selSizes[]=  $size;
+											}
+										}
+									}else{
+										if(strtolower($ext)!="webp"){
+
+										}
+									}*/
 								}
+
 							}
+						}else{
+
 						}
-					}else{
-						
 					}
 				}catch (Exception $e) {
 					unlink($img);
 				}
 			}
 		}
-		
-		
-		if($ext=="webp"){
-			$extentions = "webp";
+		/*
+		if(isset($ext) and $ext=="webp"){
+			$extentions = "webp"; echo $ext;
 		}else{
 			if(extension_loaded('gd') and $is_webp_allow==1){
 				$info = gd_info();
 				if($info["WebP Support"]){
 					$extentions = "webp,$ext";
+				}else{
+						
 				}
 			}else{
 				$extentions = "$ext";	
+				
 			}
 		}
+		*/
+		$extentions = $ext;
 		$arr = array("images" => $all_images, "name" =>$fileOrgName, "ext"=>$extentions, "sizes" => $selSizes);
 		return $arr;
+	}
+	
+	
+	function sanitize_file_name( $filename ) {
+		$filename_raw = $filename;
+		$special_chars = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%", "+", chr(0));
+		$filename = preg_replace( "#\x{00a0}#siu", ' ', $filename );
+		$filename = str_replace( $special_chars, '', $filename );
+		$filename = str_replace( array( '%20', '+' ), '-', $filename );
+		$filename = preg_replace( '/[\r\n\t -]+/', '-', $filename );
+		$filename = trim( $filename, '.-_' );
+		$parts = explode('.', $filename);
+		$filename = array_shift($parts);
+		$extension = array_pop($parts);
+		$mimes = array(
+			'jpg|jpeg|jpe' => 'image/jpeg',
+			'gif' => 'image/gif',
+			'png' => 'image/png',
+			'webp' => 'image/webp',
+			'bmp' => 'image/bmp');
+		foreach ( (array) $parts as $part) {
+			$filename .= '.' . $part;
+			if ( preg_match("/^[a-zA-Z]{2,5}\d?$/", $part) ) {
+				$allowed = false;
+				foreach ( $mimes as $ext_preg => $mime_match ) {
+					$ext_preg = '!^(' . $ext_preg . ')$!i';
+					if ( preg_match( $ext_preg, $part ) ) {
+						$allowed = true;
+						break;
+					}
+				}
+				if ( !$allowed )
+					$filename .= '_';
+			}
+		}
+		$filename .= '.' . $extension;
+		return $filename;
+	}
+	
+	// Generate Unique Filename
+	function unique_filename( $dir, $filename, $dimen="" ) {
+		// Sanitize the file name before we begin processing.
+		$filename = strtolower($this->sanitize_file_name(trim($filename)));
+
+		// Separate the filename into a name and extension.
+		$ext = pathinfo( $filename, PATHINFO_EXTENSION );
+		$name = pathinfo( $filename, PATHINFO_BASENAME );
+		$org_filename = pathinfo( $filename, PATHINFO_FILENAME);
+		if ( $ext ) {
+			$ext = '.' . $ext;
+		}
+
+		// Edge case: if file is named '.ext', treat as an empty name.
+		if ( $name === $ext ) {
+			$name = '';
+		}
+		$number = 1;
+		$dm = $dimen;
+		$withoutExt = str_replace($ext, "", $filename);
+		$file = $dir . "$filename" ;
+		while ( file_exists( $dir . "$filename" ) ) {
+			$filename = $withoutExt."-$number$ext";
+			$number++;
+		}
+		if ($number == 1){
+			$filename = $org_filename;	
+		}else{
+			$number -=1;
+			$filename = $org_filename."-$number";
+		}
+		return $filename;
 	}
 	
 	function convert_webp($source, $destination, $ext){
@@ -257,6 +342,7 @@ class ImageManage{
 			if($src["ext"]!="webp"){
 				$this->convert_webp($destination, $destinationP, $src["ext"]);
 			}
+			
 			return $new_name;
 		}else{
 			return false;
@@ -275,10 +361,15 @@ class ImageManage{
 			$new_name = $src["name"].$append.".".$src["ext"];
 			$destination = rtrim($destination, "/");
 			$destinationP = rtrim($destination, "/")."/".$src["name"].$append.".webp";
-			$destination = $destination."/".$new_name;
+			$destinationO = $destination;
+			$destination = $destinationO."/".$new_name;
 			Image::make($source)->resize($width, null, function($constraint){
 				$constraint->aspectRatio();
 			})->save($destination);
+			list($width, $height) = getimagesize($destination);
+			$new_name = $src["name"]."-$width"."x"."$height.".$src["ext"];
+			$new_des = $destinationO."/$new_name";
+			rename($destination,$new_des);
 			return $new_name;
 		}else{
 			return false;
@@ -314,7 +405,7 @@ class ImageManage{
 	  } // if function exists      
 	}
 	
-	function generate_mid($source="", $destination="", $sizes="", $append = "", $name){
+	function generate_mid($source="", $destination="", $sizes="", $append = "", $name=""){
 		if (is_file($source) and file_exists($source)){
 			
 			if (is_array($sizes)){

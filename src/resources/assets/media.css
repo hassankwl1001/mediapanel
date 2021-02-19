@@ -13,7 +13,7 @@
 .mediaPanel .inner ul{padding:0px !important;}
 .mediaPanel .m-right{width:85%; float:left;background-color:#FFF;height:100%;}
 .mediaPanel .m-box{display: flex;padding:10px;padding-right:0px;}
-.mediaPanel .m-box .ins-left{flex:0 0 78%;}
+.mediaPanel .m-box .ins-left{flex:0 0 70%;}
 .mediaPanel .m-box .ins-right{flex:1;overflow: hidden; overflow-y: auto
 ;height:90vh;padding-right:10px;}
 .mediaPanel .m-box .ins-left .inner{overflow:hidden;max-height:500px; overflow-y:auto;padding-top:10px;}
@@ -31,14 +31,11 @@
 .dg-btn-delete{border: 1px solid #CD070A;background:#CD070A;color:#fff;}
 .dg-btn-sm{font-size: 12px;padding: 5px 10px;font-weight: 600;font-family: verdana;}
 
-.mediaPanel .m-insert ul.file-list li{display:inline-block; margin-right:8px; margin-bottom:8px;cursor:pointer;width:125px;position:relative;float:left;border:3px solid #ccc;height:120px;text-align:center;}
+.mediaPanel .m-insert ul.file-list li{display:inline-block; margin-right:8px; margin-bottom:8px;cursor:pointer;width:125px;position:relative;float:left;border:3px solid #ccc;height:120px;text-align:center;background-color: #006b9f;}
 .mediaPanel .m-insert ul.file-list li.active{border:3px solid #006B9F;}
 .mediaPanel .m-insert ul.file-list li.active:before{content:"+"; position:absolute; width:30px; height:30px; background-color:#006B9F; color:#fff; font-weight:bold;right:-10px;top:-10px;font-size:20px;text-align:center;z-index:9}
-.mediaPanel .m-insert ul.file-list li img{max-width:100px; max-height:100px;position: relative;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);}
+.mediaPanel .m-insert ul.file-list li img{max-width:100%; max-height:100%;position: relative;
+  top: 50%;-webkit-transform: translateY(-50%);-ms-transform: translateY(-50%);transform: translateY(-50%);display: inline-block;}
 .mediaPanel .m-insert .f-info{display:none;margin-left:20px;font-size:14px; padding-bottom:6px; margin-bottom:6px;}
 .mediaPanel .m-insert .f-info h4{font-size:16px; font-weight:bold;}
 .mediaPanel .m-insert .f-info .alt-form{margin-top:12px; border-top:1px solid #999; padding-top:8px;}
@@ -51,7 +48,7 @@
 .upload-f .upf input[type="file"]{display:inline-block !important; padding: 20px 40px; width: 183px;border: 1px solid;
     background: transparent; opacity: 0; margin-top: -60px; position: absolute; margin-left: -91px; cursor: pointer;}
 ul.folder-g{margin:0px; padding:0px; list-style:none;}
-ul.folder-g li{font-size: 14px;font-weight: 600;width: 300px;
+ul.folder-g li{font-size: 14px;font-weight: 600;
     margin-bottom: 6px;
     border-bottom: 1px solid #ccc;
 }
@@ -78,5 +75,5 @@ ul.folder-g .action{float:right;}
 .dg-m-alert{padding:15px;margin:10px 0px;font-size:14px;border-radius:3px;font-weight: bold;}
 .dg-m-alert-info{background: #A7E8FA; color:#08647C;}
 .mediapanel .folderlist {margin-top:20px;}
-
+.m-0{margin-left: 0 !important; margin-right: 0 !important;}
 
