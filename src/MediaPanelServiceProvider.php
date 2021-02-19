@@ -1,6 +1,6 @@
 <?php
 //dgaps\mediapanel\src\MediaPanelServiceProvider.php
-namespace dgaps\mediapanel;
+namespace hassankwl1001\mediapanel;
 use Illuminate\Support\ServiceProvider;
 class MediaPanelServiceProvider extends ServiceProvider {
 	public function boot(){
@@ -8,7 +8,7 @@ class MediaPanelServiceProvider extends ServiceProvider {
 	}
 	public function register(){
 		
-		$this->app->make('dgaps\mediapanel\Http\Controllers\MediaPanelController');
+		$this->app->make('hassankwl1001\mediapanel\Http\Controllers\MediaPanelController');
 		$this->loadViewsFrom(__DIR__.'/resources/views', 'mediapanel');
 		$this->loadMigrationsFrom(__DIR__.'/Database/migrations');
 	}
