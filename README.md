@@ -1,1 +1,1 @@
-# mediapanel
+Media Panel for Laravel
