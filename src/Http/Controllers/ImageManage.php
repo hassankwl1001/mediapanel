@@ -3,8 +3,6 @@ namespace hassankwl1001\mediapanel\Http\Controllers;
 use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use WebPConvert\WebPConvert;
-use WebPConvert\Convert\Converters\Gd;
 use DB;
 class ImageManage{
 	
