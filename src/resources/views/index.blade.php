@@ -28,6 +28,10 @@
 	}
 	@endphp
 </script>
+<!-- CHOOSEN-->
+<script src="{{url('/vendor/hassankwl1001/mediapanel/src/resources/assets/chosen.js')}}" defer></script>
+<link rel="stylesheet" href="{{url('/vendor/hassankwl1001/mediapanel/src/resources/assets/chosen.css')}}" type="text/css">
+
 <link rel="stylesheet" href="{{url('/vendor/hassankwl1001/mediapanel/src/resources/assets/media.css')}}?{{rand(1,99999)}}" type="text/css">
 <script src="{{url('/vendor/hassankwl1001/mediapanel/src/resources/assets/form.js')}}" defer></script>
 <script src="{{url('/vendor/hassankwl1001/mediapanel/src/resources/assets/media.js')}}" defer></script>
