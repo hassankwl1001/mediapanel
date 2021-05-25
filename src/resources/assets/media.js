@@ -18,7 +18,7 @@ $(document).ready(function(){
 	}
 	
 	function ___chosen(){
-		$(".chosen-select-sl").select2();
+		//$(".chosen-select-sl").select2();
 	}
 	
 	//Get Size of Media

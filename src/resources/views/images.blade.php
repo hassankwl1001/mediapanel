@@ -2,9 +2,8 @@
 	<div class="ins-left">
 		<h3 class="dg-m-heading">Insert Media</h3>
 		<div class="dg-m-row row m-0">
-			<div class="dg-m-col row m-0">
-				<div class="form-group col-6"> 
-				<select name="folder" class="dg-form-control  form-control media-folder-u image-from-folder">
+			<div class="form-group"> 
+				<select name="folder" class="dg-form-control  form-control media-folder-u image-from-folder chosen-select-sl">
 					<option value="">All</option>
 					@foreach($folder as $k=>$v)
 						@php
@@ -17,7 +16,6 @@
 				<div class="form-group col-6">
 				<input type="text" placeholder="Search Here..." class="dg-form-control  form-control search_images float-right">
 				</div>
-			</div>
 		</div>
 		<div class="inner">
 			@include("mediapanel::images_list", compact("images"))

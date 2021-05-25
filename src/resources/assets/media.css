@@ -21,7 +21,7 @@
 .dg-m-row .dg-m-col{flex:1;}
 .dg-form-group{margin-bottom: 5px;}
 .dg-form-group label{display: block;margin-bottom: 5px;}
-.dg-form-control{height: 35px;padding:6px;border-radius:5px;border:1px solid #ccc;}
+.dg-form-control{height: 35px;padding:6px;border-radius:5px;border:1px solid #ccc;box-sizing: border-box;-moz-box-sizing: border-box;-webkit-box-sizing: border-box;}
 .dg-text-right{text-align: right;}
 .dg-text-left{text-align: left;}
 .dg-m-heading{margin-top: 0px;}

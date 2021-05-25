@@ -5,8 +5,12 @@
 		  <li>
 		  {{$v->folder_name}} 		  	    	
 		<div class="action">
-			<a data-title="{{$v->folder_name}}" class="edit-folder dg-btn dg-btn-primary dg-btn-sm"><i class="fa fa-edit text-white"></i></a>
-			<a data-title="{{$v->folder_name}}" class="del-folder dg-btn dg-btn-delete dg-btn-sm"><i class="fa fa-trash text-white"></i></a>
+			<a data-title="{{$v->folder_name}}" class="edit-folder dg-btn dg-btn-sm">
+			<img src="{{url('/vendor/hassankwl1001/mediapanel/src/resources/assets/edit.png')}}" width="15px;">
+			</a>
+			<a data-title="{{$v->folder_name}}" class="del-folder dg-btn dg-btn-sm">
+			<img src="{{url('/vendor/hassankwl1001/mediapanel/src/resources/assets/trash.png')}}" width="15px;">
+			</a>
 		</div>
 		<div class="m-clear"></div>
 			</li>
